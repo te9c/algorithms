@@ -34,7 +34,7 @@ struct SegmentTree {
         }
     }
     void add(int idx, int value) { set(idx, st[idx + ln] + value); }
-}    int sum(int l, int r) {
+    int sum(int l, int r) {
         l += ln;
         r += ln;
         int leftRes = 0, rightRes = 0;
@@ -54,4 +54,4 @@ struct SegmentTree {
             leftRes = leftRes + st[l];
         return leftRes + rightRes;
     }
-;
+};
