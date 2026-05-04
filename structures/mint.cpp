@@ -2,33 +2,37 @@
 
 template<uint64_t modT>
 struct mint {
+    static_assert(modT > 0);
     uint64_t number;
 
     mint() : number(0) {}
 
     template<typename T, std::enable_if_t<std::is_signed_v<T>, int64_t> = 0>
     mint(T val) {
-        int64_t temp = static_cast<int64_t>(val) % static_cast<int64_t>(modT);
-        number = (temp < 0 ? temp + mod() : temp);
+        int64_t temp = static_cast<int64_t>(val);
+        if (temp < 0) {
+            temp += mod();
+        }
+        if (temp < 0) {
+            temp %= mod();
+            temp += mod();
+        }
+        number = temp;
+        normalize();
     }
     
     template<typename T, std::enable_if_t<!std::is_signed_v<T>, int64_t> = 0>
     mint(T val) {
-        number = static_cast<uint64_t>(val) % mod();
+        number = static_cast<uint64_t>(val);
+        normalize();
     }
 
-    mint(const mint& other) { number = other.number; }
-    mint(mint&& other) { number = other.number; }
-    mint& operator=(const mint& other) {
-        number = other.number;
-        return *this;
-    }
-    mint& operator=(mint&& other) {
-        number = other.number;
-        return *this;
-    }
+    mint(const mint& other) = default;
+    mint(mint&& other) = default;
+    mint& operator=(const mint& other) = default;
+    mint& operator=(mint&& other) = default;
 
-    uint64_t mod() const {
+    constexpr uint64_t mod() const {
         return modT;
     }
 
@@ -53,7 +57,18 @@ struct mint {
         return res;
     }
 
+    static constexpr bool is_prime(uint64_t val) {
+#ifdef LOCAL
+        for (uint64_t i = 2; i * i <= val; ++i) {
+            if (val % i == 0)
+                return false;
+        }
+#endif
+        return true;
+    }
     mint inverse() {
+        static_assert(is_prime(modT));
+        assert(number != 0);
         return this->pow(mod() - 2);
     }
 
@@ -139,3 +154,5 @@ template <uint64_t T, typename U> mint<T> operator-(const mint<T>& lhs, U rhs) {
 template <uint64_t T, typename U> mint<T> operator-(U lhs, const mint<T>& rhs) { return mint<T>(lhs) - rhs; }
 template <uint64_t T, typename U> mint<T> operator*(const mint<T>& lhs, U rhs) { return lhs * mint<T>(rhs); }
 template <uint64_t T, typename U> mint<T> operator*(U lhs, const mint<T>& rhs) { return mint<T>(lhs) * rhs; }
+template <uint64_t T, typename U> mint<T> operator%(const mint<T>& lhs, U rhs) { return mint<T>(lhs.number % rhs); }
+template <uint64_t T, typename U> U operator%(U lhs, const mint<T>& rhs) { return lhs % rhs; }
