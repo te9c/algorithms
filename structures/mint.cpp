@@ -2,56 +2,113 @@
 
 template<uint64_t modT>
 struct mint {
-    const uint64_t modulo = modT;
     uint64_t number;
 
-    mint(int64_t number = 0) {
-        this->number = number;
-        normalize();
+    mint() : number(0) {}
+
+    template<typename T, std::enable_if_t<std::is_signed_v<T>, int64_t> = 0>
+    mint(T val) {
+        int64_t temp = static_cast<int64_t>(val) % static_cast<int64_t>(modT);
+        number = (temp < 0 ? temp + mod() : temp);
+    }
+    
+    template<typename T, std::enable_if_t<!std::is_signed_v<T>, int64_t> = 0>
+    mint(T val) {
+        number = static_cast<uint64_t>(val) % mod();
+    }
+
+    mint(const mint& other) { number = other.number; }
+    mint(mint&& other) { number = other.number; }
+    mint& operator=(const mint& other) {
+        number = other.number;
+        return *this;
+    }
+    mint& operator=(mint&& other) {
+        number = other.number;
+        return *this;
+    }
+
+    uint64_t mod() const {
+        return modT;
     }
 
     void normalize() {
-        if (number >= modulo) {
-            number %= modulo;
+        if (number >= mod()) {
+            number %= mod();
+            if (number < 0) {
+                number += mod();
+            }
         }
     }
 
+    mint pow(uint64_t n) {
+        uint64_t res = 1;
+        uint64_t a = number;
+        while (n) {
+            if (n & 1)
+                res = (res * a) % mod();
+            a = (a * a) % mod();
+            n >>= 1;
+        }
+        return res;
+    }
+
+    mint inverse() {
+        return this->pow(mod() - 2);
+    }
+
     mint operator+(const mint& other) const {
+        if (number + other.number >= mod()) {
+            return mint(number + other.number - mod());
+        }
         return mint(number + other.number);
     }
     mint operator-(const mint& other) const {
         if (number < other.number) {
-            return mint(number + modulo - other.number);
+            return mint(number + mod() - other.number);
         }
         return mint(number - other.number);
     }
-    mint operator*(const mint& other) const {
-        return mint(number * other);
-    }
+    mint operator*(const mint& other) const { return mint(number * other.number); }
+    mint operator%(const mint& other) const { return mint(number % other.number); }
     mint& operator+=(const mint& other) {
         number += other.number;
-        normalize();
+        if (number >= mod()) {
+            number -= mod();
+        }
         return *this;
     }
     mint& operator-=(const mint& other) {
         if (number < other.number) {
-            number += modulo;
+            number += mod();
         }
         number -= other.number;
         return *this;
     }
     mint& operator*=(const mint& other) {
-        number *= other;
+        number *= other.number;
         normalize();
-        return number;
+        return *this;
     }
+    mint& operator++() { ++number; if (number == mod()) number = 0; return *this; }
+    mint operator++(int) const { mint tmp = *this; ++(*this); return tmp; }
+    mint& operator--() { if (number == 0) number = mod(); --number; return *this; }
+    mint operator--(int) { mint tmp = *this; --(*this); return tmp; }
+    mint operator-() const {
+        return mint(-number);
+    }
+
+    template<typename U>
+    operator U() const {
+        return static_cast<U>(number);
+    }
+
     bool operator==(const mint& other) const { return number == other.number; }
     bool operator!=(const mint& other) const { return number != other.number; }
     bool operator<(const mint& other) const { return number < other.number; }
     bool operator<=(const mint& other) const { return number <= other.number; }
     bool operator>=(const mint& other) const { return number >= other.number; }
     bool operator>(const mint& other) const { return number > other.number; }
-    operator bool () const { return number; }
 
     friend std::ostream& operator<<(std::ostream& o, const mint& num) {
         return o << num.number;
@@ -62,3 +119,23 @@ struct mint {
         return i;
     }
 };
+
+template<uint64_t T, typename U> bool operator==(const mint<T>& lhs, U rhs) { return lhs == mint<T>(rhs); }
+template<uint64_t T, typename U> bool operator==(U lhs, const mint<T>& rhs) { return rhs == lhs; }
+template<uint64_t T, typename U> bool operator!=(const mint<T>& lhs, U rhs) { return !(lhs == rhs); }
+template<uint64_t T, typename U> bool operator!=(U lhs, const mint<T>& rhs) { return !(lhs == rhs); }
+template<uint64_t T, typename U> bool operator<(const mint<T>& lhs, U rhs) { return lhs < mint<T>(rhs); }
+template<uint64_t T, typename U> bool operator<(U lhs, const mint<T>& rhs) { return mint<T>(lhs) < rhs; }
+template<uint64_t T, typename U> bool operator>(const mint<T>& lhs, U rhs) { return lhs > mint<T>(rhs); }
+template<uint64_t T, typename U> bool operator>(U lhs, const mint<T>& rhs) { return mint<T>(lhs) > rhs; }
+template<uint64_t T, typename U> bool operator<=(const mint<T>& lhs, U rhs) { return !(lhs > rhs); }
+template<uint64_t T, typename U> bool operator<=(U lhs, const mint<T>& rhs) { return !(lhs > rhs); }
+template<uint64_t T, typename U> bool operator>=(const mint<T>& lhs, U rhs) { return !(lhs < rhs); }
+template<uint64_t T, typename U> bool operator>=(U lhs, const mint<T>& rhs) { return !(lhs < rhs); }
+
+template <uint64_t T, typename U> mint<T> operator+(const mint<T>& lhs, U rhs) { return lhs + mint<T>(rhs); }
+template <uint64_t T, typename U> mint<T> operator+(U lhs, const mint<T>& rhs) { return mint<T>(lhs) + rhs; }
+template <uint64_t T, typename U> mint<T> operator-(const mint<T>& lhs, U rhs) { return lhs - mint<T>(rhs); }
+template <uint64_t T, typename U> mint<T> operator-(U lhs, const mint<T>& rhs) { return mint<T>(lhs) - rhs; }
+template <uint64_t T, typename U> mint<T> operator*(const mint<T>& lhs, U rhs) { return lhs * mint<T>(rhs); }
+template <uint64_t T, typename U> mint<T> operator*(U lhs, const mint<T>& rhs) { return mint<T>(lhs) * rhs; }
