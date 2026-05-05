@@ -72,35 +72,35 @@ struct mint {
         return this->pow(mod() - 2);
     }
 
-    mint operator+(const mint& other) const {
+    mint operator+(mint other) const {
         if (number + other.number >= mod()) {
             return mint(number + other.number - mod());
         }
         return mint(number + other.number);
     }
-    mint operator-(const mint& other) const {
+    mint operator-(mint other) const {
         if (number < other.number) {
             return mint(number + mod() - other.number);
         }
         return mint(number - other.number);
     }
-    mint operator*(const mint& other) const { return mint(number * other.number); }
-    mint operator%(const mint& other) const { return mint(number % other.number); }
-    mint& operator+=(const mint& other) {
+    mint operator*(mint other) const { return mint(number * other.number); }
+    mint operator%(mint other) const { return mint(number % other.number); }
+    mint& operator+=(mint other) {
         number += other.number;
         if (number >= mod()) {
             number -= mod();
         }
         return *this;
     }
-    mint& operator-=(const mint& other) {
+    mint& operator-=(mint other) {
         if (number < other.number) {
             number += mod();
         }
         number -= other.number;
         return *this;
     }
-    mint& operator*=(const mint& other) {
+    mint& operator*=(mint other) {
         number *= other.number;
         normalize();
         return *this;
@@ -118,14 +118,14 @@ struct mint {
         return static_cast<U>(number);
     }
 
-    bool operator==(const mint& other) const { return number == other.number; }
-    bool operator!=(const mint& other) const { return number != other.number; }
-    bool operator<(const mint& other) const { return number < other.number; }
-    bool operator<=(const mint& other) const { return number <= other.number; }
-    bool operator>=(const mint& other) const { return number >= other.number; }
-    bool operator>(const mint& other) const { return number > other.number; }
+    bool operator==(mint other) const { return number == other.number; }
+    bool operator!=(mint other) const { return number != other.number; }
+    bool operator<(mint other) const { return number < other.number; }
+    bool operator<=(mint other) const { return number <= other.number; }
+    bool operator>=(mint other) const { return number >= other.number; }
+    bool operator>(mint other) const { return number > other.number; }
 
-    friend std::ostream& operator<<(std::ostream& o, const mint& num) {
+    friend std::ostream& operator<<(std::ostream& o, mint num) {
         return o << num.number;
     }
     friend std::istream& operator>>(std::istream& i, mint& num) {
