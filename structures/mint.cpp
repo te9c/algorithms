@@ -1,5 +1,6 @@
 #include <bits/stdc++.h>
 
+namespace modular {
 template<uint64_t modT>
 struct mint {
     static_assert(modT > 0);
@@ -36,22 +37,22 @@ struct mint {
         return modT;
     }
 
-    void normalize() {
+    inline void normalize() {
         if (number >= mod()) {
             number %= mod();
-            if (number < 0) {
-                number += mod();
-            }
+            // if (number < 0) {
+            //     number += mod();
+            // }
         }
     }
 
     mint pow(uint64_t n) {
-        uint64_t res = 1;
-        uint64_t a = number;
+        mint res = 1;
+        mint a = number;
         while (n) {
             if (n & 1)
-                res = (res * a) % mod();
-            a = (a * a) % mod();
+                res *= a;
+            a *= a;
             n >>= 1;
         }
         return res;
@@ -73,19 +74,22 @@ struct mint {
     }
 
     mint operator+(mint other) const {
-        if (number + other.number >= mod()) {
-            return mint(number + other.number - mod());
-        }
-        return mint(number + other.number);
+        mint res = *this;
+        res += other;
+        return res;
     }
     mint operator-(mint other) const {
-        if (number < other.number) {
-            return mint(number + mod() - other.number);
-        }
-        return mint(number - other.number);
+        mint res = *this;
+        res -= other;
+        return res;
     }
-    mint operator*(mint other) const { return mint(number * other.number); }
-    mint operator%(mint other) const { return mint(number % other.number); }
+    mint operator*(mint other) const {
+        mint res = *this;
+        res *= other;
+        return res;
+    }
+    mint operator/(mint other) const { mint res = *this; res /= other; return res; }
+    mint operator%(mint other) const { mint res = *this; res %= other; return res; }
     mint& operator+=(mint other) {
         number += other.number;
         if (number >= mod()) {
@@ -101,8 +105,22 @@ struct mint {
         return *this;
     }
     mint& operator*=(mint other) {
-        number *= other.number;
-        normalize();
+        if constexpr (modT < (1ULL << 32)) {
+            number *= other.number;
+            normalize();
+        } else {
+            __int128 num = number;
+            num *= other.number;
+            number = num % modT;
+        }
+        return *this;
+    }
+    mint& operator/=(mint other) {
+        (*this) *= other.inverse();
+        return *this;
+    }
+    mint& operator%=(mint other) {
+        number %= other.number;
         return *this;
     }
     mint& operator++() { ++number; if (number == mod()) number = 0; return *this; }
@@ -128,6 +146,8 @@ struct mint {
     friend std::ostream& operator<<(std::ostream& o, mint num) {
         return o << num.number;
     }
+    // Doesn't work when input is negative.
+    // Checking if number is negative would be too slow.
     friend std::istream& operator>>(std::istream& i, mint& num) {
         i >> num.number;
         num.normalize();
@@ -156,3 +176,5 @@ template <uint64_t T, typename U> mint<T> operator*(const mint<T>& lhs, U rhs) {
 template <uint64_t T, typename U> mint<T> operator*(U lhs, const mint<T>& rhs) { return mint<T>(lhs) * rhs; }
 template <uint64_t T, typename U> mint<T> operator%(const mint<T>& lhs, U rhs) { return mint<T>(lhs.number % rhs); }
 template <uint64_t T, typename U> U operator%(U lhs, const mint<T>& rhs) { return lhs % rhs; }
+};
+using namespace modular;
