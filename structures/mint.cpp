@@ -40,13 +40,10 @@ struct mint {
     inline void normalize() {
         if (number >= mod()) {
             number %= mod();
-            // if (number < 0) {
-            //     number += mod();
-            // }
         }
     }
 
-    mint pow(uint64_t n) {
+    mint pow(uint64_t n) const {
         mint res = 1;
         mint a = number;
         while (n) {
@@ -73,21 +70,9 @@ struct mint {
         return this->pow(mod() - 2);
     }
 
-    mint operator+(mint other) const {
-        mint res = *this;
-        res += other;
-        return res;
-    }
-    mint operator-(mint other) const {
-        mint res = *this;
-        res -= other;
-        return res;
-    }
-    mint operator*(mint other) const {
-        mint res = *this;
-        res *= other;
-        return res;
-    }
+    mint operator+(mint other) const { mint res = *this; res += other; return res; }
+    mint operator-(mint other) const { mint res = *this; res -= other; return res; }
+    mint operator*(mint other) const { mint res = *this; res *= other; return res; }
     mint operator/(mint other) const { mint res = *this; res /= other; return res; }
     mint operator%(mint other) const { mint res = *this; res %= other; return res; }
     mint& operator+=(mint other) {
@@ -127,9 +112,7 @@ struct mint {
     mint operator++(int) const { mint tmp = *this; ++(*this); return tmp; }
     mint& operator--() { if (number == 0) number = mod(); --number; return *this; }
     mint operator--(int) { mint tmp = *this; --(*this); return tmp; }
-    mint operator-() const {
-        return mint(-number);
-    }
+    mint operator-() const { return mint(mod()-number); }
 
     template<typename U>
     operator U() const {
